@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aide à cotation - NGAP Infirmière | CPTS PDFM</title>
+    
+    <!-- Tailwind CSS avec votre charte graphique -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6B5B8E',
+                        secondary: '#ede9f5',
+                        accent: '#f5f3fa'
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom styles for the details/summary accordions */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        .chevron {
+            transition: transform 0.3s ease-in-out;
+        }
+        details[open] > summary .chevron {
+            transform: rotate(90deg);
+        }
+        details[open] summary ~ * {
+            animation: slideDown 0.3s ease-in-out;
+        }
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* Scoped scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f5f3fa; }
+        ::-webkit-scrollbar-thumb { background: #6B5B8E; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5a4a7a; }
+    </style>
+</head>
+<body class="bg-accent font-['Roboto'] text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-primary text-white py-10 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-4 text-center md:text-left">
+                <i data-lucide="stethoscope" class="w-12 h-12 text-secondary drop-shadow-md hidden md:block"></i>
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-lg">
+                        Nomenclature <span class="text-secondary">NGAP IDEL</span>
+                    </h1>
+                    <p class="mt-2 text-sm md:text-base opacity-90 font-medium">aide à la cotation des actes infirmiers (2026)</p>
+                </div>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="relative w-full md:w-96">
+                <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-primary w-5 h-5"></i>
+                <input type="text" id="searchInput" placeholder="Rechercher un acte, mot-clé..." 
+                    class="w-full pl-12 pr-4 py-3 rounded-full border-2 border-transparent focus:border-secondary focus:ring-0 text-gray-800 shadow-inner placeholder-gray-400 font-medium outline-none transition-all bg-white/95 focus:bg-white">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto w-full px-4 py-8 max-w-5xl">
+        
+        <!-- Informations générales -->
+        <div class="bg-white rounded-2xl p-6 mb-8 shadow-md flex items-start gap-4 border-l-4 border-primary">
+            <div class="bg-secondary p-2 rounded-full shrink-0">
+                <i data-lucide="info" class="w-6 h-6 text-primary"></i>
+            </div>
+            <div>
+                <h2 class="font-bold text-gray-800 mb-2 text-lg">Règle générale de cumul (Article 11B)</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Lors d’une même séance : l'acte du coefficient le plus élevé est facturé à <strong class="text-primary bg-secondary px-1.5 py-0.5 rounded">100%</strong>, 
+                    le 2ème acte à <strong class="text-primary bg-secondary px-1.5 py-0.5 rounded">50%</strong>, 
+                    les suivants ne sont <strong class="text-primary bg-secondary px-1.5 py-0.5 rounded">pas facturables</strong> 
+                    <span class="text-sm italic">(sauf dérogations indiquées dans les notes)</span>.
+                </p>
+            </div>
+        </div>
+
+        <!-- Arborescence -->
+        <div id="tree-container" class="space-y-6">
+            <!-- Injecté via JavaScript -->
+        </div>
+
+        <!-- Message si aucun résultat -->
+        <div id="no-results" class="hidden text-center py-16 bg-white rounded-2xl shadow-sm border border-secondary">
+            <i data-lucide="file-search" class="w-16 h-16 text-primary/30 mx-auto mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-700">Aucun acte trouvé</h3>
+            <p class="text-gray-500 mt-2">Essayez d'autres mots-clés ou vérifiez l'orthographe.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-8 mt-8 text-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <div class="container mx-auto px-4">
+            <p class="text-secondary/80 text-sm mb-3">Outil d'aide à la cotation </p>
+            <div class="inline-flex items-center justify-center gap-2 bg-white/10 px-6 py-2 rounded-full border border-white/20">
+                <i data-lucide="heart-pulse" class="w-4 h-4 text-secondary"></i>
+                <span class="font-bold tracking-wide text-secondary">By CPTS PDFM</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Application -->
+    <script>
+        // Initialisation des icônes Lucide
+        lucide.createIcons();
+
+        // Données CSV brutes intégrées
+        const rawCsvData = `Chapitre,Article,Catégorie,Acte,Coefficient,Lettre clé,Notes facturation / cumul
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Prélèvement,Prélèvement par ponction veineuse directe,1.5,AMI/AMX,Cumulable à taux plein quel que soit l’acte associé (dérogation art.11B)
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Prélèvement,Prélèvement par ponction veineuse directe,1.5,SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Prélèvement,Saignée,5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Prélèvement,"Prélèvement aseptique cutané ou de sécrétions muqueuses, prélèvement de selles ou d'urine (examens)",1,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection intraveineuse directe isolée,2,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection intraveineuse directe en série,1.5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection intraveineuse directe chez un enfant de moins de cinq ans,2,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection intramusculaire,1,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection d'un sérum d'origine humaine ou animale selon la méthode de Besredka (surveillance incluse),5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection sous-cutanée,1,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection intradermique,1,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection d'un ou plusieurs allergènes (hyposensibilisation) + surveillance + dossier + transmissions,3,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection d'un implant souscutané,2.5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Injection,Injection en goutte à goutte par voie rectale,2,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Vaccination,Vaccination avec prescription médicale ou lorsque le vaccin ne nécessite pas de prescription,2.4,AMI/AMX,
+Chapitre I - Soins de pratique courante,Art.1 - Prélèvements et injections,Vaccination,Vaccination sans prescription médicale,3.05,AMI/AMX,
+Chapitre I - Soins de pratique courante,Art.2 - Pansements courants,Pansement,Pansement de stomie,3,AMI,
+Chapitre I - Soins de pratique courante,Art.2 - Pansements courants,Pansement,Pansement de stomie,2,SFI,
+Chapitre I - Soins de pratique courante,Art.2 - Pansements courants,Pansement,Pansement de trachéotomie (incluant aspiration + éventuel changement de canule/sonde),3,AMI,
+Chapitre I - Soins de pratique courante,Art.2 - Pansements courants,Pansement,Pansement de trachéotomie (incluant aspiration + éventuel changement de canule/sonde),2.25,SFI,
+Chapitre I - Soins de pratique courante,Art.2 - Pansements courants,Ablation,Ablation de fils ou d'agrafes (≤10) y compris pansement éventuel,2,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.2 - Pansements courants,Ablation,Ablation de fils ou d'agrafes (>10) y compris pansement éventuel,4,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.2 - Pansements courants,Pansement,Pansement de plaies opératoires étendues ou multiples après abdominoplastie ou chirurgie mammaire,3,AMI,Chirurgie mammaire bilatérale : 2 actes possibles ; 2e à 50% (art.11B)
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement postopératoire d’exérèses multiples de varices et/ou de ligatures multiples de veines perforantes (± stripping),3,AMI,Deux actes au plus peuvent être facturés
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Autre pansement,2,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Bilan,Bilan à la première prise en charge d’une plaie nécessitant un pansement lourd et complexe (inclut pansement),11,AMI/AMX,"1 séance/an si durée >1 an ; si <1 an, nouveau bilan possible en cas de récidive (interruption ≥2 mois). Non associable avec MCI (art.23.2)"
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansements de brûlure étendue ou de plaie chimique/thermique étendue (>5% surface corporelle),4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement de brûlure suite à radiothérapie (>2% surface corporelle),4,AMI/AMX,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement d'ulcère étendu ou de greffe cutanée (>60 cm²),4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement d'amputation nécessitant détersion/épluchage/régularisation,4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement de fistule digestive,4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement pour pertes de substance traumatique ou néoplasique avec lésions profondes,4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement nécessitant un méchage ou une irrigation,4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement d'escarre profonde et étendue atteignant muscles/tendons,4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement chirurgical avec matériel d'ostéosynthèse extériorisé,4,AMI/AMX/SFI,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Pansement,Pansement d'ulcère ou de greffe cutanée avec pose de compression,5.1,AMI/AMX,
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,Analgésie,Analgésie topique préalable à un pansement d’ulcère ou d’escarre,1.1,AMI/AMX,"Limite 8/épisode de cicatrisation (épisode = soins continus sans intervalle >2 mois), renouvelable 1 fois. Cumul à taux plein avec le pansement si même séance (dérogation art.11B)"
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,TPN,Pose de système de traitement par pression négative (console + pansement réservoir) à usage unique,4.6,AMI/AMX,"Prescription initiale hospitalière 30 jours, renouvelable 1 fois ; changement si saturé ou après 7 jours"
+Chapitre I - Soins de pratique courante,Art.3 - Pansements lourds et complexes,TPN,Mise en place de pansement additionnel (sans changement de console) pour TPN à usage unique,2.1,AMI/AMX,
+Chapitre I - Soins de pratique courante,Art.4 - Pose de sonde et alimentation,Sonde,Pose de sonde gastrique,3,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.4 - Pose de sonde et alimentation,Alimentation entérale,Alimentation entérale par gavage/déclive/nutri-pompe (surveillance incluse) - par séance,3,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.4 - Pose de sonde et alimentation,Alimentation entérale,Alimentation entérale par voie jéjunale avec sondage de stomie (pansement + surveillance) - par séance,4,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.5 - Appareil respiratoire,Respiratoire,Séance d'aérosol,1.5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.5 - Appareil respiratoire,Respiratoire,Lavage d'un sinus,2,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Gynéco,Injection vaginale,1.25,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Gynéco,Soins gynécologiques au décours immédiat d'un traitement par curiethérapie,1.5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Cathétérisme urétral chez la femme,3,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Cathétérisme urétral chez l'homme,4,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Changement de sonde urinaire à demeure chez la femme,3,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Changement de sonde urinaire à demeure chez l'homme,4,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Éducation à l'autosondage (max 10 séances),3.5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Réadaptation de vessie neurologique (sondage éventuel),4.5,AMI/SFI,Non cumulable avec cathétérisme urétral ou changement de sonde urinaire
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Instillation et/ou lavage vésical (sonde en place),1.25,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Pose isolée d'un étui pénien (1 fois/24h),1,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.6 - Appareil génito-urinaire,Urologie,Retrait de sonde urinaire,2,AMI,
+Chapitre I - Soins de pratique courante,Art.7 - Appareil digestif,Digestif,Soins de bouche avec application de produits médicamenteux au décours immédiat d'une radiothérapie,1.25,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.7 - Appareil digestif,Digestif,Lavement évacuateur ou médicamenteux,3,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.7 - Appareil digestif,Digestif,Extraction de fécalome ou extraction manuelle des selles,3,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.8 - Tests et enveloppe cutanée,Cutaneous,Pulvérisation de produit(s) médicamenteux,1.25,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.8 - Tests et enveloppe cutanée,Cutaneous,Réalisation de test tuberculinique,0.5,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.8 - Tests et enveloppe cutanée,Cutaneous,Lecture d'un timbre tuberculinique et transmission d'informations au médecin prescripteur,1,AMI/SFI,
+Chapitre I - Soins de pratique courante,Art.10 - Surveillance et observation,Surveillance,Administration et surveillance d'une thérapeutique orale au domicile (troubles psychiatriques/cognitifs) + fiche,1.2,AMI (AP),
+Chapitre I - Soins de pratique courante,Art.10 - Surveillance et observation,Surveillance,Administration et surveillance d'une thérapeutique orale au domicile (troubles psychiatriques) + fiche,1,SFI,
+Chapitre I - Soins de pratique courante,Art.10 - Surveillance et observation,Surveillance,Surveillance et observation lors de mise en œuvre/modification de traitement + fiche (max 15 passages),1,AMI,
+Chapitre I - Soins de pratique courante,Art.10 - Surveillance et observation,Surveillance,Surveillance et observation lors de mise en œuvre/modification de traitement + fiche,1,SFI,
+Chapitre I - Soins de pratique courante,Art.12 - BSI et forfaits dépendance,BSI,Élaboration du bilan de soins infirmiers (BSI) initial,2.5,DI,
+Chapitre I - Soins de pratique courante,Art.12 - BSI et forfaits dépendance,BSI,BSI intermédiaire (max 2/12 mois) en cas d’évolution clinique substantielle,1.2,DI,Facturation rattachée à la dernière prescription < 1 an ; nouvelle prescription non requise
+Chapitre I - Soins de pratique courante,Art.13 - Garde à domicile,Garde,Garde d'un malade à domicile (période 6h 8h-20h),13,AIS (AP),Max 2 périodes consécutives par la même infirmière
+Chapitre I - Soins de pratique courante,Art.13 - Garde à domicile,Garde,Garde d'un malade à domicile (période 6h 20h-8h),16,AIS (AP),Max 2 périodes consécutives par la même infirmière
+Chapitre I - Soins de pratique courante,Art.14 - Surveillance à distance,Télésoin,Acte de surveillance à distance (télésoin avec vidéotransmission) d'un pansement,1.6,AMI (TMI recommandé),Max 4/mois/patient ; non facturable le même jour qu’un pansement
+Chapitre II - Soins spécialisés,Art.1 - Entretien des cathéters,Cathéter,Séance d'entretien de cathéter(s) en dehors des perfusions (cathéter péritonéal) + pansement,4,AMI/SFI,
+Chapitre II - Soins spécialisés,Art.1 - Entretien des cathéters,Cathéter,Séance d'entretien de cathéter(s) en dehors des perfusions (cathéter extériorisé/site implantable/PICC) + pansement,4,AMI/SFI,
+Chapitre II - Soins spécialisés,Art.2 - Injections et prélèvements,Injection,Injection d'analgésique(s) (hors 1ère) via cathéter intrathécal/péridural,5,AMI/SFI (AP),
+Chapitre II - Soins spécialisés,Art.2 - Injections et prélèvements,Injection,Injection IV via site implanté + héparinisation + pansement,4,AMI/SFI,
+Chapitre II - Soins spécialisés,Art.2 - Injections et prélèvements,Injection,Injection IV via cathéter central + héparinisation + pansement,3,AMI/SFI,
+Chapitre II - Soins spécialisés,Art.2 - Injections et prélèvements,Prélèvement,Prélèvement sanguin sur cathéter veineux central extériorisé ou chambre implantable,1,AMI/SFI,
+Chapitre II - Soins spécialisés,Art.3 - Perfusions,Perfusion,Forfait séance de perfusion courte (≤1h) sous surveillance continue,9,AMI/AMX/SFI,
+Chapitre II - Soins spécialisés,Art.3 - Perfusions,Perfusion,Supplément surveillance continue au-delà de la 1ère heure (max 5h) - par heure,6,AMI/AMX/SFI,
+Chapitre II - Soins spécialisés,Art.3 - Perfusions,Perfusion,Forfait séance de perfusion (>1h) avec organisation d’une surveillance,14,AMI/AMX/SFI,
+Chapitre II - Soins spécialisés,Art.3 - Perfusions,Perfusion,Forfait arrêt et retrait du dispositif de perfusion + pansement (+ dossier/transmissions),5,AMI/AMX/SFI,Ne se cumule pas avec un forfait de perfusion sous surveillance continue
+Chapitre II - Soins spécialisés,Art.3 - Perfusions,Perfusion,Organisation de la surveillance d’une perfusion (hors jour pose/retrait) - par jour,4,AMI/AMX/SFI,Pas de frais de déplacement ni majorations nuit/dimanche
+Chapitre II - Soins spécialisés,Art.3 - Perfusions,Perfusion,Changement de flacon(s)/branchement en Y/débranchement/déplacement/contrôle débit (hors séance de pose),4.1,AMI/AMX/SFI,
+Chapitre II - Soins spécialisés,Art.3 - Perfusions,Perfusion,Cumul spécifique perfusions,,,Forfait perfusion sous surveillance continue et forfait perfusion >1h avec organisation de surveillance se cumulent à taux plein (dérogation art.11B)
+Chapitre II - Soins spécialisés,Art.5 bis - Patient insulino-traité,Diabète,Surveillance et observation d'un patient diabétique insulino-traité nécessitant adaptation régulière (inclut fiche),1,AMI/AMX/SFI,
+Chapitre II - Soins spécialisés,Art.5 bis - Patient insulino-traité,Diabète,Injection sous-cutanée d'insuline,1,AMI/AMX/SFI,
+Chapitre II - Soins spécialisés,Art.5 bis - Patient insulino-traité,Diabète,Séance hebdomadaire de surveillance clinique et de prévention (>75 ans) - 30 min,4,AMI/SFI,
+Chapitre II - Soins spécialisés,Art.5 ter - Suivi post-hospitalisation IC/BPCO,Suivi,Séance à domicile de surveillance clinique et de prévention post-hospitalisation IC/BPCO,5.8,AMI/AMX,Max 15 ; non cumulable avec dépendance (art.11/12) ; majorations nuit/jours fériés interdites
+Chapitre II - Soins spécialisés,Art.5 ter - Suivi post-hospitalisation IC/BPCO,Pansement,Pansement lourd et complexe diabétique insulino-traité nécessitant détersion/défibrination,4,AMI/AMX/SFI,
+Chapitre II - Soins spécialisés,Art.5 ter - Suivi post-hospitalisation IC/BPCO,Analgésie,Analgésie topique préalable à un pansement (dans le cadre art.5 ter),1.1,AMI/AMX,Cumulable à taux plein avec le pansement (dérogation art.11B)
+Chapitre II - Soins spécialisés,Art.7 - Postopératoire à domicile,Postop,Séance de surveillance clinique et d'accompagnement postopératoire à domicile (ambulatoire/RAAC),3.9,AMI,Max 3 séances entre J0 et J+6 (selon modalités)
+Chapitre II - Soins spécialisés,Art.7 - Postopératoire à domicile,Postop,Séance de surveillance et/ou retrait de cathéter périnerveux pour analgésie postopératoire,4.2,AMI,Max 1/j avec aidant ou 2/j sans aidant ; max 3 jours
+Chapitre II - Soins spécialisés,Art.7 - Postopératoire à domicile,Postop,Retrait de sonde urinaire,2,AMI,
+Chapitre II - Soins spécialisés,Art.7 - Postopératoire à domicile,Postop,Surveillance de drain de Redon et/ou retrait postopératoire (limite 2 séances),2.8,AMI,
+Chapitre II - Soins spécialisés,Art.7 - Postopératoire à domicile,Postop,Règles cumul postopératoire,,,Surveillance postop et surveillance cathéter périnerveux non cumulables entre elles ; retrait sonde + drain + (1 séance postop OU cathéter) associables sans application art.11B`;
+
+        // Parseur CSV robuste
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                let rowData = [];
+                let inQuotes = false;
+                let currentVal = '';
+                
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        rowData.push(currentVal);
+                        currentVal = '';
+                    } else {
+                        currentVal += char;
+                    }
+                }
+                rowData.push(currentVal);
+                
+                if (rowData.length >= 6) {
+                    result.push({
+                        chapitre: rowData[0]?.trim(),
+                        article: rowData[1]?.trim(),
+                        categorie: rowData[2]?.trim(),
+                        acte: rowData[3]?.replace(/^"|"$/g, '').trim(),
+                        coef: rowData[4]?.trim(),
+                        lettre: rowData[5]?.trim(),
+                        notes: rowData[6]?.replace(/^"|"$/g, '').trim() || ''
+                    });
+                }
+            }
+            return result;
+        }
+
+        const actesData = parseCSV(rawCsvData);
+
+        // Construit l'arborescence HTML
+        function renderTree(data, filterText = '') {
+            const container = document.getElementById('tree-container');
+            const noResults = document.getElementById('no-results');
+            container.innerHTML = '';
+            
+            let hasResults = false;
+            const searchLower = filterText.toLowerCase();
+
+            // Grouper par Chapitre > Article > Categorie
+            const tree = {};
+            data.forEach(item => {
+                const matchSearch = item.acte.toLowerCase().includes(searchLower) || 
+                                    item.categorie.toLowerCase().includes(searchLower) ||
+                                    item.notes.toLowerCase().includes(searchLower) ||
+                                    item.article.toLowerCase().includes(searchLower);
+
+                if (filterText === '' || matchSearch) {
+                    hasResults = true;
+                    if (!tree[item.chapitre]) tree[item.chapitre] = {};
+                    if (!tree[item.chapitre][item.article]) tree[item.chapitre][item.article] = {};
+                    if (!tree[item.chapitre][item.article][item.categorie]) tree[item.chapitre][item.article][item.categorie] = [];
+                    tree[item.chapitre][item.article][item.categorie].push(item);
+                }
+            });
+
+            if (!hasResults) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            // Génération DOM
+            for (const chapName in tree) {
+                const chapDetails = createAccordion(
+                    chapName, 
+                    'folder', 
+                    'bg-white shadow-md rounded-2xl mb-4 overflow-hidden border border-secondary', 
+                    'bg-white text-primary text-xl font-bold border-b border-secondary hover:bg-secondary/30', 
+                    filterText !== ''
+                );
+                
+                for (const artName in tree[chapName]) {
+                    const artDetails = createAccordion(
+                        artName, 
+                        'file-text', 
+                        'ml-4 md:ml-6 mt-3 border-l-2 border-primary/20 pl-3 md:pl-4', 
+                        'text-gray-800 font-semibold hover:text-primary hover:bg-secondary/50', 
+                        filterText !== ''
+                    );
+                    
+                    for (const catName in tree[chapName][artName]) {
+                        const catDetails = createAccordion(
+                            catName, 
+                            'tag', 
+                            'ml-4 md:ml-6 mt-3 border-l-2 border-primary/20 pl-3 md:pl-4', 
+                            'text-primary/80 font-bold text-sm hover:text-primary uppercase tracking-wider hover:bg-secondary/50', 
+                            filterText !== ''
+                        );
+                        
+                        const actesContainer = document.createElement('div');
+                        actesContainer.className = "mt-4 mb-6 space-y-4 ml-2 md:ml-8";
+
+                        tree[chapName][artName][catName].forEach(acte => {
+                            const acteCard = document.createElement('div');
+                            acteCard.className = "bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden group";
+                            
+                            // Highlight on search
+                            let acteNameHTML = acte.acte;
+                            if (filterText) {
+                                const regex = new RegExp(`(${filterText})`, 'gi');
+                                acteNameHTML = acteNameHTML.replace(regex, '<mark class="bg-primary/20 text-primary rounded px-1 font-bold">$1</mark>');
+                            }
+
+                            acteCard.innerHTML = `
+                                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-secondary group-hover:bg-primary transition-colors duration-300"></div>
+                                <div class="pl-3">
+                                    <h4 class="font-bold text-gray-800 mb-3 text-lg leading-snug pr-8">${acteNameHTML}</h4>
+                                    
+                                    <div class="flex flex-wrap gap-2 mb-3">
+                                        ${acte.coef ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-secondary text-primary border border-primary/20">
+                                            Coefficient : ${acte.coef}
+                                        </span>` : ''}
+                                        ${acte.lettre ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">
+                                            Cotation : ${acte.lettre}
+                                        </span>` : ''}
+                                    </div>
+                                    
+                                    ${acte.notes ? `
+                                    <div class="mt-4 bg-accent/40 rounded-xl p-3 border border-secondary">
+                                        <div class="flex items-start gap-2">
+                                            <i data-lucide="alert-circle" class="w-5 h-5 text-primary/70 shrink-0 mt-0.5"></i>
+                                            <p class="text-sm text-gray-700 font-medium">${acte.notes}</p>
+                                        </div>
+                                    </div>` : ''}
+                                </div>
+                            `;
+                            actesContainer.appendChild(acteCard);
+                        });
+                        
+                        catDetails.appendChild(actesContainer);
+                        artDetails.appendChild(catDetails);
+                    }
+                    chapDetails.appendChild(artDetails);
+                }
+                container.appendChild(chapDetails);
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Helper pour créer les éléments <details>
+        function createAccordion(title, iconName, containerClass, summaryClass, forceOpen) {
+            const details = document.createElement('details');
+            details.className = containerClass;
+            if (forceOpen) details.open = true;
+
+            const summary = document.createElement('summary');
+            summary.className = `cursor-pointer flex items-center p-3 rounded-xl select-none transition-colors ${summaryClass}`;
+            summary.innerHTML = `
+                <i data-lucide="chevron-right" class="chevron w-5 h-5 opacity-70 mr-2 shrink-0"></i>
+                <i data-lucide="${iconName}" class="w-5 h-5 opacity-70 mr-3 shrink-0"></i>
+                <span>${title}</span>
+            `;
+            
+            details.appendChild(summary);
+            return details;
+        }
+
+        // Recherche en temps réel
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderTree(actesData, e.target.value);
+        });
+
+        // Premier rendu
+        renderTree(actesData);
+    </script>
+</body>
+</html>

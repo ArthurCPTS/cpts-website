@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Annuaire Professionnel — CPTS Porte de France Moselle</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6B5B8E',
+            primaryDark: '#5a4a7a',
+            primaryLight: '#f3f1f7'
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', Arial, sans-serif; }
+    :focus-visible { outline: 3px solid #6B5B8E; outline-offset: 2px; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Retour au site
+        </a>
+        <span class="text-gray-200">|</span>
+        <div>
+          <p class="font-bold text-primary text-sm tracking-wide uppercase">CPTS</p>
+          <p class="text-xs text-gray-500 font-medium">Porte de France Moselle</p>
+        </div>
+      </div>
+      <span class="inline-block text-primary text-xs font-semibold tracking-widest uppercase border border-primary rounded-full px-4 py-1">
+        Annuaire professionnel
+      </span>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="bg-white border-b border-gray-100 py-12 px-6">
+    <div class="max-w-6xl mx-auto text-center">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+        Annuaire des professionnels de santé
+      </h1>
+      <p class="text-gray-500 text-sm max-w-xl mx-auto">
+        Retrouvez l'ensemble des professionnels de santé membres de la CPTS Porte de France Moselle.
+      </p>
+    </div>
+  </section>
+
+  <!-- Filtres -->
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 mb-6">
+      <form id="filters" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input
+          id="searchInput"
+          placeholder="Rechercher (nom, structure, commune…)"
+          class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition"
+        />
+        <select id="professionFilter" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition">
+          <option value="">Toutes les professions</option>
+        </select>
+        <select id="communeFilter" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition">
+          <option value="">Toutes les communes</option>
+        </select>
+      </form>
+    </div>
+
+    <div id="resultCount" class="text-right text-xs text-gray-400 mb-4"></div>
+    <div id="library" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    <nav id="pagination" class="flex justify-center items-center gap-2 mt-10 flex-wrap" aria-label="Pagination"></nav>
+  </main>
+
+  <footer class="border-t border-gray-100 py-8 mt-12">
+    <p class="text-center text-xs text-gray-400">© 2026 CPTS Porte de France Moselle</p>
+  </footer>
+
+  <script>
+    const ITEMS_PER_PAGE = 20;
+    let currentPage = 1;
+    let data = [], filteredData = [];
+
+    const KEYMAP = {
+      titre:       ['titre','Titre'],
+      nom:         ['Nom du professionnel','nom','Nom','NOM'],
+      prenom:      ['Prénom','prenom','Prenom','PRÉNOM','PRENOM'],
+      profession:  ['Métier / spécialité','Profession','profession'],
+      structure:   ['Nom de la structure ou cabinet','Structure','structure'],
+      tel_pro:     ['N° téléphone','Téléphone','Telephone','tel','Tel','Tel_pro','tel_pro'],
+      email:       ['Email','email','Email_1','email_1','Mail','mail'],
+      rue:         ['adresse','Adresse','Rue','rue'],
+      code_postal: ['code postal','Code_postal','CP','Code Postal','Code_Postal','cp'],
+      commune:     ['ville','Ville','Commune','commune'],
+      site_web:    ['Site web','site','Site','URL','Url','site_web']
+    };
+
+    const get = (o, k, f = '') => {
+      const ks = KEYMAP[k] || [k];
+      for (const x of ks) {
+        if (o && o[x] != null && o[x] !== '') return String(o[x]);
+      }
+      return f;
+    };
+
+    const norm = s => (s || '').toString()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase();
+
+    async function loadData() {
+      try {
+        const r = await fetch('./annuaire_pro.json', { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const raw = await r.json();
+        data = Array.isArray(raw) ? raw : (raw?.data || raw?.items || []);
+        if (!Array.isArray(data)) throw new Error("JSON non conforme");
+        populateFilters();
+        applyFilters();
+      } catch (e) {
+        document.getElementById('library').innerHTML =
+          `<p class="text-center text-red-500 col-span-full text-sm">Erreur : ${e.message}</p>`;
+      }
+    }
+
+    function populateFilters() {
+      const pSel = document.getElementById('professionFilter');
+      const cSel = document.getElementById('communeFilter');
+      const professions = [...new Set(data.map(i => get(i, 'profession')).filter(Boolean))].sort();
+      const communes    = [...new Set(data.map(i => get(i, 'commune')).filter(Boolean))].sort();
+      professions.forEach(p => pSel.add(new Option(p, p)));
+      communes.forEach(c => cSel.add(new Option(c, c)));
+    }
+
+    function applyFilters() {
+      const q = norm(document.getElementById('searchInput').value.trim());
+      const p = document.getElementById('professionFilter').value;
+      const c = document.getElementById('communeFilter').value;
+      const tokens = q.split(/\s+/).filter(Boolean);
+
+      filteredData = data.filter(i => {
+        const hay = [
+          get(i, 'titre'), get(i, 'nom'), get(i, 'prenom'),
+          get(i, 'profession'), get(i, 'structure'),
+          get(i, 'rue'), get(i, 'code_postal'), get(i, 'commune')
+        ].map(norm).join(' ');
+        const matchTokens = tokens.length === 0 || tokens.every(t => hay.includes(t));
+        return matchTokens && (!p || get(i, 'profession') === p) && (!c || get(i, 'commune') === c);
+      });
+
+      displayPage(1);
+    }
+
+    function displayPage(page) {
+      currentPage = page;
+      const start = (page - 1) * ITEMS_PER_PAGE;
+      const slice = filteredData.slice(start, start + ITEMS_PER_PAGE);
+      const lib = document.getElementById('library');
+
+      lib.innerHTML = '';
+      document.getElementById('resultCount').textContent =
+        `${filteredData.length} résultat${filteredData.length > 1 ? 's' : ''}`;
+
+      if (slice.length === 0) {
+        lib.innerHTML = `<p class="text-center text-gray-400 col-span-full text-sm py-12">Aucun résultat trouvé.</p>`;
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+
+      slice.forEach(i => {
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow';
+
+        const nomAff = [get(i, 'titre', ''), get(i, 'nom', ''), get(i, 'prenom', '')]
+          .filter(Boolean).join(' ').trim();
+        const adrAff = [get(i, 'rue', ''), get(i, 'code_postal', ''), get(i, 'commune', '')]
+          .filter(Boolean).join(', ');
+        const tel = get(i, 'tel_pro');
+        const email = get(i, 'email');
+
+        card.innerHTML = `
+          <h3 class="font-bold text-gray-900 mb-1 leading-snug">${nomAff || '—'}</h3>
+          <span class="inline-block text-xs font-semibold text-primary bg-primaryLight px-2 py-0.5 rounded-full mb-3">
+            ${get(i, 'profession', 'Non spécifié')}
+          </span>
+          ${get(i, 'structure') ? `<p class="text-xs text-gray-500 mb-1"><span class="font-medium text-gray-700">Structure :</span> ${get(i, 'structure')}</p>` : ''}
+          ${adrAff ? `<p class="text-xs text-gray-500 mb-1"><span class="font-medium text-gray-700">Adresse :</span> ${adrAff}</p>` : ''}
+          ${tel ? `<p class="text-xs text-gray-500 mb-1"><span class="font-medium text-gray-700">Tél :</span> ${tel}</p>` : ''}
+          ${email ? `<p class="text-xs text-gray-500 truncate"><span class="font-medium text-gray-700">Email :</span> ${email}</p>` : ''}
+        `;
+        lib.appendChild(card);
+      });
+
+      updatePagination();
+    }
+
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
+      const pag = document.getElementById('pagination');
+      pag.innerHTML = '';
+
+      const mk = (label, disabled, fn) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.disabled = disabled;
+        b.className = disabled
+          ? 'px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'px-3 py-2 rounded-lg text-sm bg-primary text-white hover:bg-primaryDark transition-colors';
+        if (!disabled) b.onclick = fn;
+        pag.appendChild(b);
+      };
+
+      mk('← Précédent', currentPage === 1, () => displayPage(currentPage - 1));
+      for (let i = 1; i <= totalPages; i++) {
+        const b = document.createElement('button');
+        b.textContent = i;
+        b.className = i === currentPage
+          ? 'px-3 py-2 rounded-lg text-sm bg-primaryDark text-white font-bold'
+          : 'px-3 py-2 rounded-lg text-sm border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-colors';
+        if (i !== currentPage) b.onclick = () => displayPage(i);
+        pag.appendChild(b);
+      }
+      mk('Suivant →', currentPage === totalPages, () => displayPage(currentPage + 1));
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('professionFilter').addEventListener('change', applyFilters);
+    document.getElementById('communeFilter').addEventListener('change', applyFilters);
+
+    loadData();
+  </script>
+</body>
+</html>

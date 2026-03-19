@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Répertoire Obésité – CPTS Porte de France Moselle</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#be185d',
+            secondary: '#fce7f3',
+            accent: '#fde8f2'
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-accent font-['Roboto'] text-gray-800">
+  <!-- Header -->
+<header class="bg-primary text-white py-12 shadow-lg">
+  <div class="container mx-auto px-4 text-center">
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">
+      Répertoire <span class="text-secondary">Obésité</span>
+    </h1>
+    <p class="mt-2 text-lg opacity-90">CPTS Porte de France Moselle</p>
+  </div>
+</header>
+
+  <main class="container mx-auto px-4 py-8">
+    <!-- Onglets -->
+    <div class="flex justify-center mb-8 gap-4">
+      <button id="btnEtp"
+              class="px-4 py-2 rounded-full border-2 border-primary font-medium transition bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+        Éducation thérapeutique du patient
+      </button>
+      <button id="btnPros"
+              class="px-4 py-2 rounded-full border-2 border-primary text-primary font-medium transition bg-secondary hover:bg-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/50">
+        Professionnels de santé
+      </button>
+    </div>
+
+    <!-- Sections -->
+    <div id="etpSection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="prosSection" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </main>
+
+  <!-- Modal -->
+  <div id="cardModal" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50" aria-modal="true" role="dialog">
+    <div class="relative bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 p-8 overflow-y-auto max-h-[90vh]">
+      <button id="closeCardModal" class="absolute top-2 right-3 text-gray-700 hover:text-primary text-2xl" aria-label="Fermer la fiche">&times;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ====== Données ETP ====== */
+    const etpData = [
+      {
+        programme: 'ETP Obésité Enfant/Adolescent',
+        public: 'Enfants / Adolescents',
+        structure: 'CHIC Unisanté+',
+        lieux: 'Hôpital Marie Madeleine, Forbach',
+        contact: 'Standard : 03 87 88 80 00 (Pédiatrie)',
+        focus: 'Obésité pédiatrique',
+        notes: 'Programme historique, non listé en 2024'
+      },
+      {
+        programme: '“Mission : retrouve ton cap”',
+        public: 'Enfants 3‑12 ans',
+        structure: 'FILIERIS',
+        lieux: 'Centre de Santé, 5 Rue des Moulins, 57600 Forbach',
+        contact: '03 87 85 21 03',
+        focus: 'Surpoids/Obésité enfant (diét., psycho, APA)',
+        notes: 'Actif (Listé par ORS GE), remboursé'
+      },
+      {
+        programme: 'ETP Adultes (Obésité ?)',
+        public: 'Adultes',
+        structure: 'RESAMEST (Réseau Santé Moselle Est)',
+        lieux: 'Hôpital Freyming‑Merlebach (2 rue de France) ; Hôpital Saint‑Avold',
+        contact: 'Freyming : 03 87 29 21 43 ; Siège : 03 87 13 27 45',
+        focus: 'Pathologies chroniques (Diabète, Cardio, Géronto…)',
+        notes: 'Non actif, programme existant'
+      },
+      {
+        programme: 'ETP Surpoids Adulte',
+        public: 'Adultes',
+        structure: 'RSMA (Réseau Santé Moselle Agglomération)',
+        lieux: 'Metz et arrondissement',
+        contact: '03 87 52 14 94',
+        focus: 'Surpoids adulte',
+        notes: 'Actif'
+      },
+      {
+        programme: 'ETP Obésité Enfant/Ado : ODEA',
+        public: 'Enfants / Adolescents',
+        structure: 'ADOCTHIONIS',
+        lieux: 'CHR Metz‑Thionville (Hôpital Bel Air, Thionville)',
+        contact: 'Dr E. Henry via ETP Grand Est',
+        focus: 'Obésité pédiatrique',
+        notes: 'Ressource régionale (GHT 6/9)'
+      },
+      {
+        programme: 'ETP Obésité Adulte : Redocthionis',
+        public: 'Adultes',
+        structure: 'ADOCTHIONIS',
+        lieux: 'CHR Metz‑Thionville (Hôpital Bel Air, Thionville)',
+        contact: 'Dr E. Henry via ETP Grand Est',
+        focus: 'Obésité adulte',
+        notes: 'Ressource régionale (GHT 6/9)'
+      },
+      {
+        programme: 'ETP Enfant (3‑12 ans)',
+        public: 'Enfants 3‑12 ans',
+        structure: 'FILIERIS',
+        lieux: 'Centre de Santé, 5 Rue des Moulins, 57600 Forbach',
+        contact: '03 87 85 21 03',
+        focus: 'Surpoids/Obésité enfants',
+        notes: 'Accompagnement pluriprofessionnel (diét., psycho, APA), remboursé'
+      }
+    ];
+
+    /* ====== Données Pros ====== */
+    const prosData = [
+      {
+        category: 'Chirurgie bariatrique',
+        nom: 'CHIC Unisanté+ (Pôle Chirurgie)',
+        speciality: 'Chirurgie bariatrique (adultes), équipe pluridisciplinaire',
+        address: 'Hôpital Marie Madeleine, 2 rue Thérèse, 57604 Forbach',
+        contact: '03 87 88 80 41',
+        notes: 'Parcours structuré (RCP, suivi pré/post‑op). CHU Nancy – Dr Jabaghi Salim'
+      },
+      {
+        category: 'Centre spécialisé régional',
+        nom: 'CSO Grand Est (Dr C. Mettavant)',
+        speciality: 'Obésités complexes (adultes/enfants)',
+        address: 'CHR Metz‑Thionville, 1 Allée du Château, 57530 Ars‑Laquenexy',
+        contact: '<a href="mailto:c.mettavant@chr-metz-thionville.fr" class="text-primary underline">c.mettavant@chr-metz-thionville.fr</a>',
+        notes: 'Référence régionale. Coordination filières'
+      },
+      {
+        category: 'Endocrinologie',
+        nom: 'Dr Aurelian Trebea',
+        speciality: 'Endocrino‑Diabétologue',
+        address: 'St‑Avold (SOS Santé) ; Freyming‑Merlebach',
+        contact: '03 87 91 14 44 / 03 87 81 80 00',
+        notes: 'Consultation aspects métaboliques'
+      },
+      {
+        category: 'Pédiatrie (Obésité)',
+        nom: 'CHIC Unisanté+ (Pôle Femmes‑Enfants)',
+        speciality: 'Pédiatrie (Dr R. Hatahet)',
+        address: 'Hôpital Marie Madeleine, Forbach',
+        contact: '03 87 88 80 00',
+        notes: 'Prise en charge enfant/ado, ETP Surpoids‑Obésité'
+      },
+      {
+        category: 'Activité Physique Adaptée',
+        nom: 'Camille Antoine',
+        speciality: 'Accompagnement APA',
+        address: 'Forbach',
+        contact: '06 41 73 98 23',
+        notes: 'Prescri Mouv, coaching personnel'
+      },
+      {
+        category: 'Activité Physique Adaptée',
+        nom: 'Perrine Tousch',
+        speciality: 'Accompagnement APA',
+        address: 'Forbach',
+        contact: '06 76 66 03 33',
+        notes: 'Coaching, suivi personnel'
+      },
+      {
+        category: 'Diététicien Libéral',
+        nom: 'Sandrine Guelfi',
+        speciality: 'Perte de poids, diabète…',
+        address: '12A Place Robert Schuman, 57600 Forbach',
+        contact: '06 95 52 09 39 / <a href="mailto:sandrineguelfi@yahoo.fr" class="text-primary underline">sandrineguelfi@yahoo.fr</a>',
+        notes: 'RDV possibles'
+      },
+      {
+        category: 'Diététicien Libéral',
+        nom: 'Marie Leggio',
+        speciality: 'Conseils diététiques',
+        address: '26 Rue Houillère, 57800 Freyming‑Merlebach',
+        contact: '06 33 12 50 84 / Doctolib',
+        notes: 'RDV en ligne'
+      },
+      {
+        category: 'Diététicien Libéral',
+        nom: 'Sofia Tomaz',
+        speciality: 'Diététicienne (Perte de poids, diabète…)',
+        address: '24 Rue Sainte‑Croix, 57600 Forbach',
+        contact: '03 87 88 51 44',
+        notes: 'RDV possibles'
+      },
+      {
+        category: 'Coordination locale',
+        nom: 'CPTS Porte de France Moselle',
+        speciality: 'Coordination soins & prévention',
+        address: '7 Rue Fabert, 57600 Forbach',
+        contact: '<a href="https://www.cptsportedefrancemoselle.fr" target="_blank" rel="noopener" class="text-primary underline">cptsportedefrancemoselle.fr</a>',
+        notes: 'Structure coordonnée'
+      }
+    ];
+
+    /* ====== Rendu cartes ====== */
+    function renderEtp() {
+      const container = document.getElementById('etpSection');
+      container.innerHTML = '';
+      etpData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transform hover:-translate-y-1 transition cursor-pointer';
+        card.innerHTML = `
+          <h3 class="text-primary text-xl font-semibold mb-2">${item.programme}</h3>
+          <p class="text-sm"><span class="font-medium">Public cible :</span> ${item.public}</p>
+          <p class="text-sm"><span class="font-medium">Structure :</span> ${item.structure}</p>
+          <p class="text-sm"><span class="font-medium">Lieu(x) :</span> ${item.lieux}</p>
+        `;
+        card.addEventListener('click', () => openCardModal(item, 'etp'));
+        container.appendChild(card);
+      });
+    }
+
+    function renderPros() {
+      const container = document.getElementById('prosSection');
+      container.innerHTML = '';
+      prosData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transform hover:-translate-y-1 transition cursor-pointer';
+        card.innerHTML = `
+          <h3 class="text-primary text-xl font-semibold mb-2">${item.nom}</h3>
+          <p class="text-sm"><span class="font-medium">Catégorie :</span> ${item.category}</p>
+          <p class="text-sm"><span class="font-medium">Spécialité :</span> ${item.speciality}</p>
+          <p class="text-sm"><span class="font-medium">Adresse :</span> ${item.address}</p>
+        `;
+        card.addEventListener('click', () => openCardModal(item, 'pros'));
+        container.appendChild(card);
+      });
+    }
+
+    /* ====== Onglets ====== */
+    function showSection(type) {
+      const etpBtn = document.getElementById('btnEtp');
+      const prosBtn = document.getElementById('btnPros');
+      const etpSec = document.getElementById('etpSection');
+      const prosSec = document.getElementById('prosSection');
+
+      if (type === 'etp') {
+        etpSec.classList.remove('hidden');
+        prosSec.classList.add('hidden');
+        etpBtn.classList.add('bg-primary','text-white');
+        etpBtn.classList.remove('bg-secondary','text-primary');
+        prosBtn.classList.remove('bg-primary','text-white');
+        prosBtn.classList.add('bg-secondary','text-primary');
+      } else {
+        prosSec.classList.remove('hidden');
+        etpSec.classList.add('hidden');
+        prosBtn.classList.add('bg-primary','text-white');
+        prosBtn.classList.remove('bg-secondary','text-primary');
+        etpBtn.classList.remove('bg-primary','text-white');
+        etpBtn.classList.add('bg-secondary','text-primary');
+      }
+    }
+
+    /* ====== Modale ====== */
+    function openCardModal(item, type) {
+      const modal = document.getElementById('cardModal');
+      const content = document.getElementById('modalContent');
+
+      if (type === 'etp') {
+        content.innerHTML = `
+          <h2 class="text-2xl font-bold text-primary mb-4">${item.programme}</h2>
+          <p class="mb-2"><span class="font-medium">Public cible :</span> ${item.public}</p>
+          <p class="mb-2"><span class="font-medium">Structure :</span> ${item.structure}</p>
+          <p class="mb-2"><span class="font-medium">Lieu(x) :</span> ${item.lieux}</p>
+          <p class="mb-2"><span class="font-medium">Contact :</span> ${item.contact}</p>
+          <p class="mb-2"><span class="font-medium">Focus :</span> ${item.focus}</p>
+          <p class="mb-2"><span class="font-medium">Statut / Notes :</span> ${item.notes}</p>
+        `;
+      } else if (type === 'pros') {
+        content.innerHTML = `
+          <h2 class="text-2xl font-bold text-primary mb-4">${item.nom}</h2>
+          <p class="mb-2"><span class="font-medium">Catégorie :</span> ${item.category}</p>
+          <p class="mb-2"><span class="font-medium">Spécialité :</span> ${item.speciality}</p>
+          <p class="mb-2"><span class="font-medium">Adresse :</span> ${item.address}</p>
+          <p class="mb-2"><span class="font-medium">Contact :</span> ${item.contact ?? ''}</p>
+          ${item.notes ? `<p class="mb-2"><span class="font-medium">Notes :</span> ${item.notes}</p>` : ''}
+        `;
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('cardModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('closeCardModal').addEventListener('click', closeModal);
+    document.getElementById('cardModal').addEventListener('click', (e) => {
+      if (e.target.id === 'cardModal') closeModal();
+    });
+
+    document.getElementById('btnEtp').addEventListener('click', () => showSection('etp'));
+    document.getElementById('btnPros').addEventListener('click', () => showSection('pros'));
+
+    /* Initialisation */
+    renderEtp();
+    renderPros();
+    showSection('etp');
+  </script>
+</body>
+</html>

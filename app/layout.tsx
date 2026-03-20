@@ -1,21 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "zapier-interfaces-chatbot-embed": React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & {
-          "is-popup"?: string;
-          "chatbot-id"?: string;
-        },
-        HTMLElement
-      >;
-    }
-  }
-}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,12 +28,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <zapier-interfaces-chatbot-embed is-popup="true" chatbot-id="cmfnm9gpc000e1im1tkn67qwr" />
-        <Script
-          src="https://interfaces.zapier.com/assets/web-components/zapier-interfaces/zapier-interfaces.esm.js"
-          type="module"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );

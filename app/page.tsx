@@ -91,8 +91,7 @@ export default function Home() {
             Communauté Professionnelle Territoriale de Santé
           </span>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-            Une santé coordonnée pour{" "}
-            <span className="text-[#6B5B8E]">Porte de France Moselle</span>
+            Améliorons l'accès aux soins <span className="text-[#6B5B8E]">sur notre territoire</span>
           </h1>
           <p className="text-lg text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
             Professionnels de santé unis pour améliorer l&apos;accès aux soins, la prévention
